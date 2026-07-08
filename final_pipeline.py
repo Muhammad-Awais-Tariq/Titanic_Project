@@ -15,7 +15,8 @@ x_train , x_test , y_train , y_test = train_test_split(X , y , test_size=0.30 , 
 
 age_median = x_train["Age"].median()
 embarked_mode = x_train["Embarked"].mode()[0]
-fare_bins = x_train["Fare"].quantile([0, 0.25, 0.5, 0.75, 1.0]).values
+fare_median = x_train["Fare"].median()
+fare_bins = x_train["Fare"].quantile([0, 0.25, 0.5, 0.75, 1.0]).values.copy()
 fare_bins[0] = -np.inf   
 fare_bins[-1] = np.inf  
 
@@ -29,6 +30,7 @@ def transform_data(df):
     X["Is_alone"] = np.where(X["Family"] == 1, 1, 0)
     X["Age_bracket"] = pd.cut(X['Age'], bins=[-np.inf, 12, 18, 60, np.inf], labels=['child','teen','adult','senior'])
     X["Has_cabin"] = X["Cabin"].notna().astype(int)
+    X["Fare"] = X["Fare"].fillna(fare_median)
     X["Fare_bracket"] = pd.cut(X["Fare"], bins=fare_bins, labels=["Low_fare","Medium_fare","High_fare","Very_high_fare"])
     X.drop(columns=["PassengerId","Name","Age","SibSp","Parch","Ticket","Fare","Cabin","Family"], inplace=True)
     return X
@@ -68,3 +70,12 @@ random_forest_pipeline = Pipeline([
 ])
 
 random_forest_pipeline.fit(x_train, y_train)
+
+final_test = pd.read_csv("F://Titanic_Project//Data//test (2).csv")
+passenger_ids = final_test["PassengerId"]
+prediction = random_forest_pipeline.predict(final_test)
+
+pd.DataFrame({
+    "PassengerId": passenger_ids,
+    "Survived" : prediction
+}).to_csv("F://Titanic_Project//Finalprediction.csv" , index=False)
