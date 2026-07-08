@@ -5,6 +5,9 @@ from sklearn.preprocessing import OneHotEncoder , FunctionTransformer , Standard
 from sklearn.pipeline import Pipeline 
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble        import RandomForestClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree            import DecisionTreeClassifier
+
 
 titanic_df = pd.read_csv("F://Titanic_Project//Data//train (2).csv")
 
@@ -63,17 +66,17 @@ preprocessor = ColumnTransformer([
     ("cat_ord" , categorical_ordinal_pipeline , categorical_coloumns_ordinal)
 ])
 
-random_forest_pipeline = Pipeline([
+Tree_pipline = Pipeline([
     ("Feature_enginnering" , FunctionTransformer(transform_data)),
     ("Preprocessing" , preprocessor),
-    ("Model" , RandomForestClassifier(n_estimators=50 , min_samples_split=20 , min_samples_leaf=1,max_depth=10 , max_features="log2", random_state=42 , criterion="gini" ) )
+    ("Model" , DecisionTreeClassifier(max_depth=3 , criterion="gini" , min_samples_split=15 , random_state=42 , min_samples_leaf=5) )
 ])
 
-random_forest_pipeline.fit(x_train, y_train)
+Tree_pipline .fit(x_train, y_train)
 
 final_test = pd.read_csv("F://Titanic_Project//Data//test (2).csv")
 passenger_ids = final_test["PassengerId"]
-prediction = random_forest_pipeline.predict(final_test)
+prediction = Tree_pipline .predict(final_test)
 
 pd.DataFrame({
     "PassengerId": passenger_ids,
